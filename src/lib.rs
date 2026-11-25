@@ -21,7 +21,7 @@ pub use enums::*;
 pub use sqlx;
 pub use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 pub use tables::*;
-pub use types::UnparsedVersion;
+pub use types::{CiVersion, HintVersion};
 
 /// Hostname of the public UDD mirror.
 pub const PUBLIC_MIRROR_HOST: &str = "udd-mirror.debian.net";

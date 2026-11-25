@@ -177,14 +177,8 @@ TYPES.update(ENUMS)
 
 # debversion columns that hold values which are not valid Debian versions.
 OVERRIDES = {
-    ("ci", "version"): (
-        "UnparsedVersion",
-        "Usually a Debian version, but can be `n/a`.",
-    ),
-    ("hints", "version"): (
-        "UnparsedVersion",
-        "Usually a Debian version, but can include an architecture, e.g. `1.0-1/arm64`.",
-    ),
+    ("ci", "version"): "CiVersion",
+    ("hints", "version"): "HintVersion",
 }
 
 KEYWORDS = {
@@ -255,10 +249,7 @@ for module, tables in modules.items():
         ]
         for col, udt, nullable in columns[table]:
             rtype = TYPES[udt]
-            override = OVERRIDES.get((table, col))
-            if override:
-                rtype, note = override
-                lines.append(f"    /// {note}")
+            rtype = OVERRIDES.get((table, col), rtype)
             used.add(rtype)
             if nullable:
                 rtype = f"Option<{rtype}>"
@@ -294,8 +285,9 @@ for module, tables in modules.items():
         imports.append("use serde_json::Value as JsonValue;")
     if "PgInterval" in used:
         imports.append("use sqlx::postgres::types::PgInterval;")
-    if "UnparsedVersion" in used:
-        imports.append("use crate::types::UnparsedVersion;")
+    for t in ["CiVersion", "HintVersion"]:
+        if t in used:
+            imports.append(f"use crate::types::{t};")
     enums = sorted(e for e in ENUMS.values() if e in used)
     if enums:
         imports.append(

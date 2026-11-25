@@ -132,7 +132,15 @@ table_tests! {
 #[tokio::test]
 #[ignore = "needs network access"]
 async fn ci_non_version() {
-    check::<Ci>("ci", "SELECT * FROM ci WHERE version = 'n/a' LIMIT 10").await;
+    let pool = connect_public_mirror().await.unwrap();
+    let rows: Vec<Ci> = sqlx::query_as("SELECT * FROM ci WHERE version = 'n/a' LIMIT 10")
+        .fetch_all(&pool)
+        .await
+        .unwrap();
+    assert!(!rows.is_empty());
+    for row in rows {
+        assert_eq!(row.version, Some(CiVersion::NotAvailable));
+    }
 }
 
 #[tokio::test]
@@ -140,7 +148,7 @@ async fn ci_non_version() {
 async fn hints_version_with_arch() {
     check::<Hint>(
         "hints",
-        "SELECT * FROM hints WHERE version::text LIKE '%/%' LIMIT 10",
+        "SELECT * FROM hints WHERE version::text LIKE '%/%'",
     )
     .await;
 }

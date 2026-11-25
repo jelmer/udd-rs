@@ -3,6 +3,9 @@
 //! Field types follow the column types in UDD: `debversion` columns map to
 //! [`debversion::Version`], nullable columns to [`Option`].
 
+// TODO: Decode relationship fields such as `depends` and `build_depends` as
+// debian_control relations once debian-control supports sqlx.
+
 pub mod archive;
 pub mod blends;
 pub mod bugs;
